@@ -1,9 +1,3 @@
-## Live <a href='https://next-js-13-chat-app.vercel.app/'> Website </a>
-
-<br />
-<br />
-
-
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
