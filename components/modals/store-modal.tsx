@@ -2,6 +2,8 @@
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import axios from "axios";
 
 import { useStoreModal } from "@/hooks/useStoreModal";
 import Modal from "../ui/modal";
@@ -15,21 +17,32 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import toast from "react-hot-toast";
+
+const formSchema = z.object({
+	name: z.string().min(1),
+});
 
 const StoreModal = () => {
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const storeModal = useStoreModal();
 
-	const formSchema = z.object({
-		name: z.string().min(1),
-	});
+	const [isLoading, setIsLoading] = useState(false);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
-		console.log(values);
+		try {
+			setIsLoading(true);
+			const response = await axios.post("/api/stores", values);
+			window.location.assign(`/${response.data.id}`);
+		} catch (error) {
+			toast.error("Something went wrong");
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -49,17 +62,27 @@ const StoreModal = () => {
 								<FormItem>
 									<FormLabel>Name</FormLabel>
 									<FormControl>
-										<Input placeholder="e.g: E-Commerce" {...field} />
+										<Input
+											disabled={isLoading}
+											placeholder="e.g: E-Commerce"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
 						<div className="pt-6 space-x-2 flex items-center justify-end w-full">
-							<Button variant="outline" onClick={storeModal.onClose}>
+							<Button
+								disabled={isLoading}
+								variant="outline"
+								onClick={storeModal.onClose}
+							>
 								Cancel
 							</Button>
-							<Button type="submit">Continue</Button>
+							<Button disabled={isLoading} type="submit">
+								Continue
+							</Button>
 						</div>
 					</form>
 				</Form>
