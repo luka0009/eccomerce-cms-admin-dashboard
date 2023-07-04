@@ -13,14 +13,18 @@ import Heading from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Store } from "@prisma/client";
 import { Trash } from "lucide-react";
+
+import { Store } from "@prisma/client";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
+import AlertModal from "@/components/modals/alert-modal";
+import ApiALert from "@/components/ui/api-alert";
+import { useOrigin } from "@/hooks/use-origin";
 
 interface Props {
 	initialData: Store;
@@ -35,8 +39,10 @@ type SettingsFormValues = z.infer<typeof formSchema>;
 const SettingsForm: React.FC<Props> = ({ initialData }) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
+
 	const params = useParams();
 	const router = useRouter();
+	const origin = useOrigin();
 
 	const form = useForm<SettingsFormValues>({
 		resolver: zodResolver(formSchema),
@@ -56,8 +62,29 @@ const SettingsForm: React.FC<Props> = ({ initialData }) => {
 		}
 	}
 
+	const onDelete = async () => {
+		try {
+			setIsLoading(true);
+			await axios.delete(`/api/stores/${params.storeId}`);
+			router.refresh();
+			router.push("/");
+			toast.success("Store deleted.");
+		} catch (error: any) {
+			toast.error("Make sure you removed all products and categories first.");
+		} finally {
+			setIsLoading(false);
+			setIsOpen(false);
+		}
+	};
+
 	return (
 		<>
+			<AlertModal
+				isOpen={isOpen}
+				onClose={() => setIsOpen(false)}
+				onConfirm={onDelete}
+				isLoading={isLoading}
+			/>
 			<div className="flex items-center justify-between">
 				<Heading title="Settings" description="Manage your store" />
 				<Button
@@ -100,6 +127,12 @@ const SettingsForm: React.FC<Props> = ({ initialData }) => {
 					</Button>
 				</form>
 			</Form>
+			<Separator />
+			<ApiALert
+				title="PUBLIC_URL"
+				description={`${origin}/api/${params.storeId}`}
+				variant="public"
+			/>
 		</>
 	);
 };
