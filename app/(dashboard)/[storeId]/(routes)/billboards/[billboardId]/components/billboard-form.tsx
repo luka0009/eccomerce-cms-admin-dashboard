@@ -84,7 +84,7 @@ const BillboardForm: React.FC<Props> = ({ initialData }) => {
 				`/api/${params.storeId}/billboards/${params.billboardId}`
 			);
 			router.refresh();
-			router.push("/");
+			router.push(`/${params.storeId}/billboards`);
 			toast.success("Billboard deleted.");
 		} catch (error: any) {
 			toast.error("Make sure you removed all categories first.");
@@ -165,7 +165,6 @@ const BillboardForm: React.FC<Props> = ({ initialData }) => {
 					</Button>
 				</form>
 			</Form>
-			<Separator />
 		</>
 	);
 };

@@ -11,15 +11,52 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Copy, Edit, MoreHorizontal, Trash, Trash2, Trash2Icon } from "lucide-react";
+import { Copy, Edit, MoreHorizontal, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+
+import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import axios from "axios";
+import AlertModal from "@/components/modals/alert-modal";
 
 interface Props {
 	data: BillboardColumn;
 }
 
 const CellAction: React.FC<Props> = ({ data }) => {
+	const [isLoading, setIsLoading] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
+
+	const router = useRouter();
+	const params = useParams();
+
+	const onCopy = (id: string) => {
+		navigator.clipboard.writeText(id);
+		toast.success("Copied to clipboard");
+	};
+
+	const onDelete = async () => {
+		try {
+			setIsLoading(true);
+			await axios.delete(`/api/${params.storeId}/billboards/${data.id}`);
+			router.refresh();
+			toast.success("Billboard deleted.");
+		} catch (error: any) {
+			toast.error("Make sure you removed all categories first.");
+		} finally {
+			setIsLoading(false);
+			setIsOpen(false);
+		}
+	};
+
 	return (
 		<>
+			<AlertModal
+				isOpen={isOpen}
+				isLoading={isLoading}
+				onConfirm={onDelete}
+				onClose={() => setIsOpen(false)}
+			/>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button variant="ghost" className="h-8 w-8 p-0">
@@ -30,16 +67,20 @@ const CellAction: React.FC<Props> = ({ data }) => {
 				<DropdownMenuContent>
 					<DropdownMenuLabel>Actions</DropdownMenuLabel>
 					<DropdownMenuSeparator />
-					<DropdownMenuItem>
+					<DropdownMenuItem
+						onClick={() =>
+							router.push(`/${params.storeId}/billboards/${data.id}`)
+						}
+					>
 						<Edit className="mr-2 h-4 w-4" />
 						Update
 					</DropdownMenuItem>
-					<DropdownMenuItem>
+					<DropdownMenuItem onClick={() => onCopy(data.id)}>
 						<Copy className="mr-2 h-4 w-4" />
 						Copy ID
 					</DropdownMenuItem>
-					<DropdownMenuItem>
-                        <Trash2 className="mr-2 h-4 w-4" />
+					<DropdownMenuItem onClick={() => setIsOpen(true)}>
+						<Trash2 className="mr-2 h-4 w-4" />
 						Delete
 					</DropdownMenuItem>
 				</DropdownMenuContent>
