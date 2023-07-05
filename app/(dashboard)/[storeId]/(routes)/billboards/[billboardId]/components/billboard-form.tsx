@@ -23,8 +23,6 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/modals/alert-modal";
-import ApiALert from "@/components/ui/api-alert";
-import { useOrigin } from "@/hooks/use-origin";
 import ImageUpload from "@/components/ui/image-upload";
 
 interface Props {
@@ -44,7 +42,6 @@ const BillboardForm: React.FC<Props> = ({ initialData }) => {
 
 	const params = useParams();
 	const router = useRouter();
-	const origin = useOrigin();
 
 	const title = initialData ? "Edit Billboard" : "Create Billboard";
 	const description = initialData ? "Edit a Billboard" : "Add a new Billboard";
