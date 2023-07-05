@@ -25,6 +25,7 @@ import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/modals/alert-modal";
 import ApiALert from "@/components/ui/api-alert";
 import { useOrigin } from "@/hooks/use-origin";
+import ImageUpload from "@/components/ui/image-upload";
 
 interface Props {
 	initialData: Billboard | null;
@@ -61,9 +62,16 @@ const BillboardForm: React.FC<Props> = ({ initialData }) => {
 	async function onSubmit(values: BillboardFormValues) {
 		try {
 			setIsLoading(true);
-			await axios.patch(`/api/stores/${params.storeId}`, values);
+			if (initialData) {
+				await axios.patch(
+					`/api/${params.storeId}/billboards/${params.billboardId}`,
+					values
+				);
+			} else {
+				await axios.post(`/api/${params.storeId}/billboards`, values);
+			}
 			router.refresh();
-			toast.success("Store Updated");
+			toast.success(toastMessage);
 		} catch (error) {
 			toast.error("Something went wrong");
 		} finally {
@@ -74,12 +82,14 @@ const BillboardForm: React.FC<Props> = ({ initialData }) => {
 	const onDelete = async () => {
 		try {
 			setIsLoading(true);
-			await axios.delete(`/api/stores/${params.storeId}`);
+			await axios.delete(
+				`/api/${params.storeId}/billboards/${params.billboardId}`
+			);
 			router.refresh();
 			router.push("/");
-			toast.success("Store deleted.");
+			toast.success("Billboard deleted.");
 		} catch (error: any) {
-			toast.error("Make sure you removed all products and categories first.");
+			toast.error("Make sure you removed all categories first.");
 		} finally {
 			setIsLoading(false);
 			setIsOpen(false);
@@ -113,18 +123,37 @@ const BillboardForm: React.FC<Props> = ({ initialData }) => {
 					onSubmit={form.handleSubmit(onSubmit)}
 					className="space-y-8 w-full"
 				>
+					<FormField
+						control={form.control}
+						name="label"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Label</FormLabel>
+								<FormControl>
+									<Input
+										disabled={isLoading}
+										placeholder="Enter billboard label here"
+										{...field}
+									/>
+								</FormControl>
+
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 					<div className="grid grid-cols-3 gap-8">
 						<FormField
 							control={form.control}
-							name="label"
+							name="imageUrl"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Label</FormLabel>
+									<FormLabel>Image</FormLabel>
 									<FormControl>
-										<Input
+										<ImageUpload
 											disabled={isLoading}
-											placeholder="Enter billboard label here"
-											{...field}
+											onChange={(url) => field.onChange(url)}
+											onRemove={() => field.onChange("")}
+											value={field.value ? [field.value] : []}
 										/>
 									</FormControl>
 
