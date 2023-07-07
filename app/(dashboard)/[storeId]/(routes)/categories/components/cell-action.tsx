@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { BillboardColumn } from "./columns";
+import { CategoryColumn } from "./columns";
 
 import {
 	DropdownMenu,
@@ -20,7 +20,7 @@ import axios from "axios";
 import AlertModal from "@/components/modals/alert-modal";
 
 interface Props {
-	data: BillboardColumn;
+	data: CategoryColumn;
 }
 
 const CellAction: React.FC<Props> = ({ data }) => {
@@ -38,11 +38,13 @@ const CellAction: React.FC<Props> = ({ data }) => {
 	const onDelete = async () => {
 		try {
 			setIsLoading(true);
-			await axios.delete(`/api/${params.storeId}/billboards/${data.id}`);
+			await axios.delete(`/api/${params.storeId}/categories/${data.id}`);
 			router.refresh();
-			toast.success("Billboard deleted.");
+			toast.success("Category deleted.");
 		} catch (error: any) {
-			toast.error("Make sure you removed all categories first.");
+			toast.error(
+				"Make sure you removed all products for this category first."
+			);
 		} finally {
 			setIsLoading(false);
 			setIsOpen(false);
@@ -67,17 +69,17 @@ const CellAction: React.FC<Props> = ({ data }) => {
 				<DropdownMenuContent>
 					<DropdownMenuLabel>Actions</DropdownMenuLabel>
 					<DropdownMenuSeparator />
+					<DropdownMenuItem onClick={() => onCopy(data.id)}>
+						<Copy className="mr-2 h-4 w-4" />
+						Copy ID
+					</DropdownMenuItem>
 					<DropdownMenuItem
 						onClick={() =>
-							router.push(`/${params.storeId}/billboards/${data.id}`)
+							router.push(`/${params.storeId}/categories/${data.id}`)
 						}
 					>
 						<Edit className="mr-2 h-4 w-4" />
 						Update
-					</DropdownMenuItem>
-					<DropdownMenuItem onClick={() => onCopy(data.id)}>
-						<Copy className="mr-2 h-4 w-4" />
-						Copy ID
 					</DropdownMenuItem>
 					<DropdownMenuItem onClick={() => setIsOpen(true)}>
 						<Trash2 className="mr-2 h-4 w-4" />
